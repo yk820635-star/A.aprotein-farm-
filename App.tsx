@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { DataProvider } from './context/DataContext';
-import { NotificationProvider } from './context/NotificationContext';
+import { NotificationProvider } from './NotificationContext';
 import LoginPage from './pages/Login';
 import Header from './components/Header';
 import Sidebar from './components/Sidebar';
@@ -55,23 +55,27 @@ const AppContent: React.FC = () => {
     }
 
     return (
-        <div className="flex h-screen bg-gray-100 font-sans">
-            <Sidebar 
-                currentPage={currentPage} 
-                setCurrentPage={setCurrentPage} 
-                isSidebarOpen={isSidebarOpen}
-                setSidebarOpen={setSidebarOpen}
-            />
+        <div className="flex h-screen bg-slate-50 font-sans">
+            <div className="no-print">
+                <Sidebar 
+                    currentPage={currentPage} 
+                    setCurrentPage={setCurrentPage} 
+                    isSidebarOpen={isSidebarOpen}
+                    setSidebarOpen={setSidebarOpen}
+                />
+            </div>
             <div className="flex-1 flex flex-col overflow-hidden">
-                <Header setSidebarOpen={setSidebarOpen} />
-                <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gray-50 p-4 md:p-6 lg:p-8">
+                <div className="no-print">
+                    <Header setSidebarOpen={setSidebarOpen} />
+                </div>
+                <main className="flex-1 overflow-x-hidden overflow-y-auto bg-slate-50 p-4 md:p-6 lg:p-8">
                     {renderPage()}
                 </main>
             </div>
              {/* Overlay for mobile when sidebar is open */}
              {isSidebarOpen && (
                 <div 
-                    className="fixed inset-0 bg-black bg-opacity-50 z-20 md:hidden"
+                    className="fixed inset-0 bg-black bg-opacity-50 z-20 md:hidden no-print"
                     onClick={() => setSidebarOpen(false)}
                     aria-hidden="true"
                 ></div>

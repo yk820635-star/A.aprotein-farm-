@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useData } from '../context/DataContext';
-import { useNotification } from '../context/NotificationContext';
+import { useNotification } from '../NotificationContext';
 import { SecurityLog, GateMovementType } from '../types';
 import { FiPlusCircle, FiUpload } from 'react-icons/fi';
 import { formatDateTime } from '../utils/helpers';

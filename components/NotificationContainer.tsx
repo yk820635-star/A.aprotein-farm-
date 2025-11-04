@@ -1,5 +1,5 @@
 import React from 'react';
-import { useNotificationState } from '../context/NotificationContext';
+import { useNotificationState } from '../NotificationContext';
 import { FiCheckCircle, FiXCircle, FiInfo, FiX } from 'react-icons/fi';
 
 const icons: Record<string, React.ReactElement> = {

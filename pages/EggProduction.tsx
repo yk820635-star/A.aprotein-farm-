@@ -1,10 +1,8 @@
-
 import React, { useState, useMemo } from 'react';
 import { useData } from '../context/DataContext';
 import { FiPlusCircle, FiFilter } from 'react-icons/fi';
 import { formatDate, formatNumber } from '../utils/helpers';
 import DataChart from '../components/DataChart';
-// FIX: Import types to correctly handle egg production data structure.
 import { EggCategoryProduction, EggStock } from '../types';
 
 const EggProduction: React.FC = () => {
@@ -27,7 +25,6 @@ const EggProduction: React.FC = () => {
         setFormData(prev => ({...prev, [name]: value }));
     };
 
-    // FIX: Create helper to build the correct data structure for an egg production report from simplified form input.
     const emptyEggStock: EggStock = { petti: 0, tray: 0, eggs: 0 };
     const createEggCategory = (totalEggs: number): EggCategoryProduction => ({
         opening: emptyEggStock,
@@ -37,8 +34,6 @@ const EggProduction: React.FC = () => {
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        // FIX: Pass the correct object structure instead of a number for each egg category, resolving type errors.
-        // FIX: Add 'dirty' category to the egg production report to match the required type.
         addEggProductionReport({
             date: formData.date,
             flockId: formData.flockId,
@@ -77,7 +72,6 @@ const EggProduction: React.FC = () => {
         }).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
     }, [eggReports, startDate, endDate]);
     
-    // FIX: Add helper function to correctly calculate total eggs from the data structure.
     const calculateTotalEggs = (stock: EggStock) => (stock.petti * 360) + (stock.tray * 30) + stock.eggs;
     
     return (
@@ -95,7 +89,6 @@ const EggProduction: React.FC = () => {
                             {flocks.map(flock => <option key={flock.id} value={flock.id}>{flock.name}</option>)}
                         </select>
                     </div>
-                    {/* FIX: Add input for 'dirty' eggs to match data model and fix UI inconsistency. */}
                     {['starter', 'medium', 'standard', 'jumbo', 'dirty', 'broken', 'liquid'].map(s => (
                          <div key={s}>
                             <label className="block text-sm font-medium text-gray-700 capitalize">{s}</label>
@@ -127,15 +120,12 @@ const EggProduction: React.FC = () => {
                     <table className="min-w-full bg-white text-sm">
                         <thead className="bg-gray-100">
                             <tr>
-                                {/* FIX: Add 'Dirty' to table header to match data model. */}
                                 {['Date', 'Flock', 'Starter', 'Medium', 'Standard', 'Jumbo', 'Dirty', 'Broken', 'Liquid', 'Total', 'Prod %'].map(h => <th key={h} className="text-left py-3 px-4 uppercase font-semibold text-gray-600">{h}</th>)}
                             </tr>
                         </thead>
-                        {/* FIX: Correctly render table by calculating totals from the nested data structure. */}
                         <tbody>
                             {filteredReports.map(r => {
                                 const flock = flocks.find(f => f.id === r.flockId);
-                                // FIX: Add 'dirty' eggs to the report categories for accurate calculation and display.
                                 const reportCategories = [r.starter, r.medium, r.standard, r.jumbo, r.dirty, r.broken, r.liquid];
                                 const totalEggs = reportCategories.reduce((sum, cat) => sum + calculateTotalEggs(cat.today), 0);
                                 const prodPercentage = flock ? ((totalEggs / flock.currentBirdCount) * 100).toFixed(2) : 'N/A';

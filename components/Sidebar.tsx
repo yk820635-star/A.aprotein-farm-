@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Page, Role } from '../types';
 import { useAuth } from '../context/AuthContext';
@@ -44,7 +43,7 @@ const Sidebar: React.FC<SidebarProps> = ({ currentPage, setCurrentPage, isSideba
                 className={`flex items-center p-3 my-1 rounded-lg cursor-pointer transition-all duration-200 ${
                     isActive
                         ? 'bg-green-600 text-white shadow-lg'
-                        : 'text-gray-200 hover:bg-green-800 hover:text-white'
+                        : 'text-gray-300 hover:bg-gray-700 hover:text-white'
                 }`}
             >
                 <Icon className="mr-3" size={20} />
@@ -54,7 +53,7 @@ const Sidebar: React.FC<SidebarProps> = ({ currentPage, setCurrentPage, isSideba
     };
 
     return (
-        <aside className={`w-64 bg-green-700 text-white p-4 flex flex-col flex-shrink-0
+        <aside className={`w-64 bg-gray-800 text-white p-4 flex flex-col flex-shrink-0
             fixed inset-y-0 left-0 z-30 
             md:static
             transform transition-transform duration-300 ease-in-out
@@ -62,13 +61,13 @@ const Sidebar: React.FC<SidebarProps> = ({ currentPage, setCurrentPage, isSideba
             md:translate-x-0`
         }>
             <div className="flex justify-between items-start mb-8 mt-4">
-                 <div className="text-center">
+                 <div className="text-left">
                     <span className="text-5xl" role="img" aria-label="egg">🐔</span>
-                    <h2 className="text-xl font-semibold mt-2">ERP System</h2>
+                    <h2 className="text-xl font-semibold mt-2 text-white">ERP System</h2>
                  </div>
                 <button 
                     onClick={() => setSidebarOpen(false)} 
-                    className="md:hidden text-white hover:text-green-200"
+                    className="md:hidden text-gray-300 hover:text-white"
                     aria-label="Close menu"
                 >
                     <FiX size={24} />
@@ -81,7 +80,7 @@ const Sidebar: React.FC<SidebarProps> = ({ currentPage, setCurrentPage, isSideba
                     ))}
                 </ul>
             </nav>
-            <div className="text-center text-xs text-green-200 mt-auto">
+            <div className="text-center text-xs text-gray-400 mt-auto">
                 <p>&copy; {new Date().getFullYear()} A&A Protein Farm</p>
             </div>
         </aside>

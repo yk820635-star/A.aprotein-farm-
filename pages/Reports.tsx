@@ -3,9 +3,11 @@ import { FiDownload, FiPrinter } from 'react-icons/fi';
 import { useData } from '../context/DataContext';
 import { formatNumber, isToday } from '../utils/helpers';
 import { EggProductionReport, EggStock, TransactionType } from '../types';
+import { useNotification } from '../NotificationContext';
 
 const Reports: React.FC = () => {
     const { flocks, eggReports, feedReports, mortalityReports, financeTransactions } = useData();
+    const { addNotification } = useNotification();
 
     // Calculations for today's summary
     const calculateTotalEggsFromStock = (stock: EggStock): number => (stock.petti * 360) + (stock.tray * 30) + stock.eggs;
@@ -21,20 +23,12 @@ const Reports: React.FC = () => {
 
     const totalBirds = flocks.reduce((sum, flock) => sum + flock.currentBirdCount, 0);
     const totalEggsToday = eggReports.filter(r => isToday(r.date)).reduce((sum, r) => sum + getTotalEggsFromReport(r), 0);
-    const feedUsedToday = feedReports.filter(r => isToday(r.date)).reduce((sum, r) => {
-        const flock = flocks.find(f => f.id === r.flockId);
-        const feedInKg = flock ? (r.feedConsumedPerBird * flock.currentBirdCount) / 1000 : 0;
-        return sum + feedInKg;
-    }, 0);
+    const feedUsedToday = feedReports.filter(r => isToday(r.date)).reduce((sum, r) => sum + r.totalFeedUsed, 0);
     const mortality24h = mortalityReports.filter(r => isToday(r.date)).reduce((sum, r) => sum + r.total, 0);
     const cashInwardToday = financeTransactions.filter(t => isToday(t.date) && t.type === TransactionType.Inward).reduce((sum, t) => sum + t.amount, 0);
     const cashOutwardToday = financeTransactions.filter(t => isToday(t.date) && t.type === TransactionType.Outward).reduce((sum, t) => sum + t.amount, 0);
     const netCashFlow = cashInwardToday - cashOutwardToday;
     const todayFormatted = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
-
-    const handleExport = (format: 'PDF' | 'Excel') => {
-        alert(`${format} export functionality not implemented.`);
-    };
 
     const handlePrint = () => {
         window.print();
@@ -42,12 +36,12 @@ const Reports: React.FC = () => {
 
     return (
         <div className="space-y-6">
-            <div className="bg-white p-6 rounded-xl shadow-md">
+            <div className="bg-white p-6 rounded-xl shadow-md animate-fade-in-up no-print">
                 <h2 className="text-2xl font-bold text-gray-800 mb-6">Generate Reports</h2>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                     <div>
                         <label className="block text-sm font-medium text-gray-700">Report Type</label>
-                        <select className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2">
+                        <select className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-green-500 focus:border-green-500">
                             <option>Daily Summary</option>
                             <option>Weekly Production</option>
                             <option>Monthly Finance</option>
@@ -57,11 +51,11 @@ const Reports: React.FC = () => {
                     </div>
                     <div>
                         <label className="block text-sm font-medium text-gray-700">Start Date</label>
-                        <input type="date" className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" />
+                        <input type="date" className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-green-500 focus:border-green-500" />
                     </div>
                     <div>
                         <label className="block text-sm font-medium text-gray-700">End Date</label>
-                        <input type="date" className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" />
+                        <input type="date" className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-green-500 focus:border-green-500" />
                     </div>
                 </div>
                 <div className="flex space-x-4">
@@ -71,36 +65,39 @@ const Reports: React.FC = () => {
                 </div>
             </div>
             
-            <div className="bg-white p-6 rounded-xl shadow-md">
-                <div className="flex justify-between items-center mb-4">
+            <div className="bg-white p-6 rounded-xl shadow-md animate-fade-in-up" style={{animationDelay: '100ms'}}>
+                <div className="flex justify-between items-center mb-4 no-print">
                     <h3 className="text-xl font-bold text-gray-800">Report Preview: Daily Summary ({todayFormatted})</h3>
                     <div className="flex space-x-2">
-                         <button onClick={() => handleExport('PDF')} className="flex items-center bg-red-500 text-white px-3 py-1 rounded-md text-sm hover:bg-red-600">
+                         <button onClick={() => addNotification('PDF export is handled via the print function.', 'info')} className="flex items-center bg-red-500 text-white px-3 py-1 rounded-md text-sm hover:bg-red-600">
                             <FiDownload className="mr-1"/> PDF
                         </button>
-                        <button onClick={() => handleExport('Excel')} className="flex items-center bg-green-500 text-white px-3 py-1 rounded-md text-sm hover:bg-green-600">
+                        <button onClick={() => addNotification('Excel export is not yet available.', 'info')} className="flex items-center bg-green-500 text-white px-3 py-1 rounded-md text-sm hover:bg-green-600">
                             <FiDownload className="mr-1"/> Excel
                         </button>
                         <button onClick={handlePrint} className="flex items-center bg-gray-500 text-white px-3 py-1 rounded-md text-sm hover:bg-gray-600">
-                            <FiPrinter className="mr-1"/> Print
+                            <FiPrinter className="mr-1"/> Print / Save as PDF
                         </button>
                     </div>
                 </div>
-                <div className="border rounded-lg p-8 printable-area">
+                <div className="printable-area">
                     <div className="text-center mb-8 border-b pb-4">
                         <h1 className="text-2xl font-bold text-green-800">A&A PROTEIN FARM</h1>
                         <p className="text-sm text-gray-500">Basti Botay Wala, Multan</p>
-                        <p className="font-semibold mt-2">Daily Summary Report for {todayFormatted}</p>
+                        <h2 className="font-semibold mt-2 text-lg">Daily Summary Report</h2>
+                        <p className="text-sm text-gray-600">{todayFormatted}</p>
                     </div>
-                    <div className="space-y-4 text-sm">
-                        <p><strong>Total Birds:</strong> {formatNumber(totalBirds)}</p>
-                        <p><strong>Total Egg Production:</strong> {formatNumber(totalEggsToday)}</p>
-                        <p><strong>Total Feed Consumed:</strong> {formatNumber(Math.round(feedUsedToday))} kg</p>
-                        <p><strong>Total Mortality:</strong> {formatNumber(mortality24h)}</p>
-                        <p><strong>Cash Inward:</strong> PKR {formatNumber(cashInwardToday)}</p>
-                        <p><strong>Cash Outward:</strong> PKR {formatNumber(cashOutwardToday)}</p>
-                        <p><strong>Net Cash Flow:</strong> <span className={netCashFlow >= 0 ? 'text-green-600' : 'text-red-600'}>PKR {formatNumber(netCashFlow)}</span></p>
-                    </div>
+                    <table className="w-full text-left text-base">
+                        <tbody>
+                            <tr className="border-b"><td className="py-2 pr-4 font-semibold">Total Birds:</td><td className="py-2">{formatNumber(totalBirds)}</td></tr>
+                            <tr className="border-b"><td className="py-2 pr-4 font-semibold">Total Egg Production:</td><td className="py-2">{formatNumber(totalEggsToday)}</td></tr>
+                            <tr className="border-b"><td className="py-2 pr-4 font-semibold">Total Feed Consumed:</td><td className="py-2">{formatNumber(Math.round(feedUsedToday))} kg</td></tr>
+                            <tr className="border-b"><td className="py-2 pr-4 font-semibold">Total Mortality:</td><td className="py-2">{formatNumber(mortality24h)}</td></tr>
+                            <tr className="border-b"><td className="py-2 pr-4 font-semibold">Cash Inward:</td><td className="py-2">PKR {formatNumber(cashInwardToday)}</td></tr>
+                            <tr className="border-b"><td className="py-2 pr-4 font-semibold">Cash Outward:</td><td className="py-2">PKR {formatNumber(cashOutwardToday)}</td></tr>
+                            <tr><td className="py-2 pr-4 font-bold">Net Cash Flow:</td><td className={`py-2 font-bold ${netCashFlow >= 0 ? 'text-green-600' : 'text-red-600'}`}>PKR {formatNumber(netCashFlow)}</td></tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>

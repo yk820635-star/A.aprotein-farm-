@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { useData } from '../context/DataContext';
-import { useNotification } from '../context/NotificationContext';
+import { useNotification } from '../NotificationContext';
 import { DailyFeedReport } from '../types';
 import { FiPlusCircle, FiFilter } from 'react-icons/fi';
 import { formatDate } from '../utils/helpers';
@@ -34,11 +34,19 @@ const DailyReport: React.FC = () => {
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
+        // FIX: Add missing properties `openingStockFeed`, `feedReceived`, and `totalFeedUsed` to satisfy the Omit<DailyFeedReport, "id"> type.
+        const flock = flocks.find(f => f.id === formData.flockId);
+        const totalFeedUsed = flock ? (Number(formData.feedConsumedPerBird) * flock.currentBirdCount) / 1000 : 0;
         addFeedReport({
-            ...formData,
+            date: formData.date,
+            flockId: formData.flockId,
+            remarks: formData.remarks,
             feedConsumedPerBird: Number(formData.feedConsumedPerBird) || 0,
             waterConsumedNormal: Number(formData.waterConsumedNormal) || 0,
             waterConsumedMedicated: Number(formData.waterConsumedMedicated) || 0,
+            openingStockFeed: 0, // Not in form, default to 0
+            feedReceived: 0, // Not in form, default to 0
+            totalFeedUsed: totalFeedUsed,
         });
         addNotification('Feed & Water report added successfully!', 'success');
         // Reset form

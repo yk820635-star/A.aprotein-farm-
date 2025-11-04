@@ -1,16 +1,20 @@
 import React, { useState } from 'react';
 import { useData } from '../context/DataContext';
-import { useNotification } from '../context/NotificationContext';
-import { FinanceTransaction, TransactionType } from '../types';
+import { useNotification } from '../NotificationContext';
+import { FinanceTransaction, TransactionType, Role } from '../types';
 import { FiPlusCircle, FiSave } from 'react-icons/fi';
 import { formatDate, formatNumber } from '../utils/helpers';
 import Modal from '../components/Modal';
+import { useAuth } from '../context/AuthContext';
 
 const FinanceLedger: React.FC = () => {
     const { financeTransactions, addFinanceTransaction } = useData();
     const { addNotification } = useNotification();
+    const { user } = useAuth();
     const [activeTab, setActiveTab] = useState<TransactionType>(TransactionType.Inward);
     const [isModalOpen, setIsModalOpen] = useState(false);
+
+    const canAddTransaction = user && [Role.Admin, Role.Accountant].includes(user.role);
 
     const initialFormState = {
         date: new Date().toISOString().substring(0, 10),
@@ -45,7 +49,7 @@ const FinanceLedger: React.FC = () => {
     const totalOutward = financeTransactions.filter(t => t.type === TransactionType.Outward).reduce((sum, t) => sum + t.amount, 0);
     const closingBalance = openingBalance + totalInward - totalOutward;
 
-    const filteredTransactions = financeTransactions.filter(t => t.type === activeTab);
+    const filteredTransactions = financeTransactions.filter(t => t.type === activeTab).sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
     return (
         <>
@@ -80,7 +84,7 @@ const FinanceLedger: React.FC = () => {
             </Modal>
 
             <div className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 text-center">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 text-center animate-fade-in-up">
                     {[{label: 'Opening Balance', value: openingBalance}, {label: 'Total Inward', value: totalInward}, {label: 'Total Outward', value: totalOutward}, {label: 'Closing Balance', value: closingBalance}].map(item => (
                         <div key={item.label} className="bg-white p-4 rounded-lg shadow-sm">
                             <p className="text-sm text-gray-500">{item.label}</p>
@@ -89,12 +93,14 @@ const FinanceLedger: React.FC = () => {
                     ))}
                 </div>
 
-                <div className="bg-white p-6 rounded-xl shadow-md">
+                <div className="bg-white p-6 rounded-xl shadow-md animate-fade-in-up" style={{animationDelay: '100ms'}}>
                     <div className="flex justify-between items-center mb-6">
                         <h2 className="text-2xl font-bold text-gray-800">Finance Ledger</h2>
-                        <button onClick={() => handleOpenModal(activeTab)} className="flex items-center bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors">
-                            <FiPlusCircle className="mr-2" /> Add New Transaction
-                        </button>
+                        {canAddTransaction && (
+                            <button onClick={() => handleOpenModal(activeTab)} className="flex items-center bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors">
+                                <FiPlusCircle className="mr-2" /> Add New Transaction
+                            </button>
+                        )}
                     </div>
                     
                     <div className="border-b border-gray-200">
@@ -115,14 +121,14 @@ const FinanceLedger: React.FC = () => {
                                     {['Date', 'Voucher No.', activeTab === TransactionType.Inward ? 'Source' : 'Expense Type', 'Amount (PKR)', 'Remarks'].map(h => <th key={h} className="text-left py-3 px-4 uppercase font-semibold text-sm text-gray-600">{h}</th>)}
                                 </tr>
                             </thead>
-                            <tbody>
+                            <tbody className="divide-y divide-gray-200">
                                 {filteredTransactions.map(t => (
-                                    <tr key={t.id} className="border-b border-gray-200 hover:bg-gray-50">
-                                        <td className="py-3 px-4">{formatDate(t.date)}</td>
-                                        <td className="py-3 px-4">{t.voucherNo}</td>
-                                        <td className="py-3 px-4">{t.sourceOrExpenseType}</td>
-                                        <td className={`py-3 px-4 font-semibold ${activeTab === TransactionType.Inward ? 'text-green-600' : 'text-red-600'}`}>{formatNumber(t.amount)}</td>
-                                        <td className="py-3 px-4">{t.remarks}</td>
+                                    <tr key={t.id} className="hover:bg-gray-50">
+                                        <td className="py-4 px-4">{formatDate(t.date)}</td>
+                                        <td className="py-4 px-4">{t.voucherNo}</td>
+                                        <td className="py-4 px-4">{t.sourceOrExpenseType}</td>
+                                        <td className={`py-4 px-4 font-semibold ${activeTab === TransactionType.Inward ? 'text-green-600' : 'text-red-600'}`}>{formatNumber(t.amount)}</td>
+                                        <td className="py-4 px-4">{t.remarks}</td>
                                     </tr>
                                 ))}
                             </tbody>

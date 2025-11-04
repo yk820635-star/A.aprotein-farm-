@@ -1,15 +1,19 @@
 import React, { useState } from 'react';
 import { useData } from '../context/DataContext';
-import { useNotification } from '../context/NotificationContext';
-import { InventoryItem } from '../types';
+import { useNotification } from '../NotificationContext';
+import { InventoryItem, Role } from '../types';
 import { FiPlusCircle, FiSave } from 'react-icons/fi';
 import { formatNumber } from '../utils/helpers';
 import Modal from '../components/Modal';
+import { useAuth } from '../context/AuthContext';
 
 const Inventory: React.FC = () => {
     const { inventory, addInventoryItem } = useData();
     const { addNotification } = useNotification();
+    const { user } = useAuth();
     const [isModalOpen, setIsModalOpen] = useState(false);
+
+    const canAddItem = user && [Role.Admin, Role.Accountant].includes(user.role);
 
     const initialFormState = {
         name: '',
@@ -83,12 +87,14 @@ const Inventory: React.FC = () => {
                     </div>
                  </form>
             </Modal>
-            <div className="bg-white p-6 rounded-xl shadow-md">
+            <div className="bg-white p-6 rounded-xl shadow-md animate-fade-in-up">
                 <div className="flex justify-between items-center mb-6">
                     <h2 className="text-2xl font-bold text-gray-800">Inventory Management</h2>
-                    <button onClick={() => setIsModalOpen(true)} className="flex items-center bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors">
-                        <FiPlusCircle className="mr-2" /> Add New Item
-                    </button>
+                    {canAddItem && (
+                        <button onClick={() => setIsModalOpen(true)} className="flex items-center bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors">
+                            <FiPlusCircle className="mr-2" /> Add New Item
+                        </button>
+                    )}
                 </div>
 
                 <div className="overflow-x-auto">
@@ -100,18 +106,18 @@ const Inventory: React.FC = () => {
                                 ))}
                             </tr>
                         </thead>
-                        <tbody className="text-gray-700">
+                        <tbody className="text-gray-700 divide-y divide-gray-200">
                             {inventory.map(item => {
                                 const isLowStock = item.stock <= item.lowStockThreshold;
                                 return (
-                                    <tr key={item.id} className="border-b border-gray-200 hover:bg-gray-50">
-                                        <td className="py-3 px-4 font-semibold">{item.name}</td>
-                                        <td className="py-3 px-4">{item.category}</td>
-                                        <td className="py-3 px-4">{formatNumber(item.stock)}</td>
-                                        <td className="py-3 px-4">{item.unit}</td>
-                                        <td className="py-3 px-4">{formatNumber(item.lowStockThreshold)}</td>
-                                        <td className="py-3 px-4">{item.supplier}</td>
-                                        <td className="py-3 px-4">
+                                    <tr key={item.id} className="hover:bg-gray-50">
+                                        <td className="py-4 px-4 font-semibold">{item.name}</td>
+                                        <td className="py-4 px-4">{item.category}</td>
+                                        <td className="py-4 px-4">{formatNumber(item.stock)}</td>
+                                        <td className="py-4 px-4">{item.unit}</td>
+                                        <td className="py-4 px-4">{formatNumber(item.lowStockThreshold)}</td>
+                                        <td className="py-4 px-4">{item.supplier}</td>
+                                        <td className="py-4 px-4">
                                             <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
                                                 isLowStock 
                                                 ? 'bg-red-100 text-red-800' 

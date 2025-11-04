@@ -86,10 +86,9 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
          // Update flock data
         setFlocks(prevFlocks => prevFlocks.map(flock => {
             if (flock.id === report.flockId) {
-                const feedInKg = (report.feedConsumedPerBird * flock.currentBirdCount) / 1000;
                 return {
                     ...flock,
-                    totalFeed: flock.totalFeed + feedInKg,
+                    totalFeed: flock.totalFeed + report.totalFeedUsed,
                 };
             }
             return flock;

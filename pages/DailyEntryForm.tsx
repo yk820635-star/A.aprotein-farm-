@@ -276,8 +276,7 @@ const DailyEntryForm: React.FC = () => {
                                     <td className="py-1 px-2 border capitalize font-semibold">{size}</td>
                                     {(['opening', 'today', 'sale'] as const).map(cat => 
                                         (['petti', 'tray', 'eggs'] as const).map(unit =>
-                                            // FIX: Explicitly convert `size` to a string in the key to avoid potential runtime errors.
-                                            <td key={`${String(size)}-${cat}-${unit}`} className="border p-0"><input type="number" min="0" value={d[cat][unit] || ''} onChange={e => handleEggChange(size, cat, unit, e.target.value)} className="w-full h-full text-center p-1"/></td>
+                                            <td key={`${size}-${cat}-${unit}`} className="border p-0"><input type="number" min="0" value={d[cat][unit] || ''} onChange={e => handleEggChange(size, cat, unit, e.target.value)} className="w-full h-full text-center p-1"/></td>
                                         )
                                     )}
                                     <td className="border p-1 bg-gray-100">{closingPetti}</td>

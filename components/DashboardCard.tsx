@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { FiArrowUp, FiArrowDown } from 'react-icons/fi';
 
@@ -16,7 +15,7 @@ const DashboardCard: React.FC<DashboardCardProps> = ({ title, value, icon: Icon,
     const trendColor = trend === 'up' ? 'text-green-500' : trend === 'down' ? 'text-red-500' : 'text-gray-500';
 
     return (
-        <div className="bg-white p-6 rounded-xl shadow-md border-l-4" style={{ borderColor: color }}>
+        <div className="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300">
             <div className="flex justify-between items-start">
                 <div>
                     <p className="text-sm font-medium text-gray-500 uppercase tracking-wider">{title}</p>

@@ -1,15 +1,19 @@
 import React, { useState } from 'react';
 import { useData } from '../context/DataContext';
-import { useNotification } from '../context/NotificationContext';
-import { Flock } from '../types';
+import { useNotification } from '../NotificationContext';
+import { Flock, Role } from '../types';
 import { formatDate, formatNumber } from '../utils/helpers';
 import { FiEdit, FiTrash, FiPlusCircle, FiSave } from 'react-icons/fi';
 import Modal from '../components/Modal';
+import { useAuth } from '../context/AuthContext';
 
 const FlockManagement: React.FC = () => {
     const { flocks, addFlock } = useData();
     const { addNotification } = useNotification();
+    const { user } = useAuth();
     const [isModalOpen, setIsModalOpen] = useState(false);
+
+    const canAddFlock = user && [Role.Admin, Role.Manager].includes(user.role);
     
     const initialFormState = {
         name: '',
@@ -73,15 +77,17 @@ const FlockManagement: React.FC = () => {
                     </div>
                 </form>
             </Modal>
-            <div className="bg-white p-6 rounded-xl shadow-md">
+            <div className="bg-white p-6 rounded-xl shadow-md animate-fade-in-up">
                 <div className="flex justify-between items-center mb-6">
                     <h2 className="text-2xl font-bold text-gray-800">Flock Management</h2>
-                    <button 
-                        onClick={() => setIsModalOpen(true)}
-                        className="flex items-center bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors"
-                    >
-                        <FiPlusCircle className="mr-2" /> Add New Flock
-                    </button>
+                    {canAddFlock && (
+                        <button 
+                            onClick={() => setIsModalOpen(true)}
+                            className="flex items-center bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors"
+                        >
+                            <FiPlusCircle className="mr-2" /> Add New Flock
+                        </button>
+                    )}
                 </div>
 
                 <div className="overflow-x-auto">
@@ -89,21 +95,21 @@ const FlockManagement: React.FC = () => {
                         <thead className="bg-gray-100">
                             <tr>
                                 {['Flock Name', 'Breed', 'Arrival Date', 'Initial Birds', 'Current Birds', 'Mortality', 'Cost/Chick', 'Actions'].map(header => (
-                                    <th key={header} className="text-left py-3 px-4 uppercase font-semibold text-sm text-gray-600">{header}</th>
+                                    <th key={header} className="text-left py-3 px-4 uppercase font-semibold text-sm text-gray-600 tracking-wider">{header}</th>
                                 ))}
                             </tr>
                         </thead>
-                        <tbody className="text-gray-700">
+                        <tbody className="text-gray-700 divide-y divide-gray-200">
                             {flocks.map(flock => (
-                                <tr key={flock.id} className="border-b border-gray-200 hover:bg-gray-50">
-                                    <td className="py-3 px-4 font-semibold">{flock.name}</td>
-                                    <td className="py-3 px-4">{flock.breed}</td>
-                                    <td className="py-3 px-4">{formatDate(flock.arrivalDate)}</td>
-                                    <td className="py-3 px-4">{formatNumber(flock.initialBirdCount)}</td>
-                                    <td className="py-3 px-4">{formatNumber(flock.currentBirdCount)}</td>
-                                    <td className="py-3 px-4">{formatNumber(flock.totalMortality)}</td>
-                                    <td className="py-3 px-4">PKR {formatNumber(flock.costPerChick)}</td>
-                                    <td className="py-3 px-4">
+                                <tr key={flock.id} className="hover:bg-gray-50">
+                                    <td className="py-4 px-4 font-semibold">{flock.name}</td>
+                                    <td className="py-4 px-4">{flock.breed}</td>
+                                    <td className="py-4 px-4">{formatDate(flock.arrivalDate)}</td>
+                                    <td className="py-4 px-4">{formatNumber(flock.initialBirdCount)}</td>
+                                    <td className="py-4 px-4">{formatNumber(flock.currentBirdCount)}</td>
+                                    <td className="py-4 px-4">{formatNumber(flock.totalMortality)}</td>
+                                    <td className="py-4 px-4">PKR {formatNumber(flock.costPerChick)}</td>
+                                    <td className="py-4 px-4">
                                         <div className="flex items-center space-x-4">
                                             <button onClick={() => handleEditFlock(flock.id)} className="text-blue-500 hover:text-blue-700"><FiEdit size={18} /></button>
                                             <button onClick={() => handleDeleteFlock(flock.id)} className="text-red-500 hover:text-red-700"><FiTrash size={18} /></button>
